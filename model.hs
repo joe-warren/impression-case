@@ -66,6 +66,12 @@ switchTracks =
       trackD = 65/3
    in Csg.unionConcat [Csg.translate (0, (screenHeight/2)-(16 + (i*trackD)), 0) oneTrack | i <- [0..3]]
 
+switch :: Csg.BspTree 
+switch = let t = 0.25 
+          in Csg.unionConcat [
+               Csg.scale (1,10-t,4.5-t) $ Csg.translate (0.5, 0, -0.5) Csg.unitCube,
+               Csg.scale (2,4-t,2-t) $ Csg.translate (-0.5, 0, -0.5) Csg.unitCube
+             ]
 stripHeight = 15
 stripThickness = 2
 stripDown = 11
@@ -137,7 +143,9 @@ objectRight =
 pathLeft = "impression-case-left.stl"
 
 pathRight = "impression-case-right.stl"
+pathSwitch = "impression-case-switch.stl"
 main :: IO ()
 main = do 
   T.writeFile pathLeft $ Csg.STL.toSTL objectLeft
   T.writeFile pathRight $ Csg.STL.toSTL objectRight
+  T.writeFile pathSwitch $ Csg.STL.toSTL switch
