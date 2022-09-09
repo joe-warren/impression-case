@@ -4,9 +4,9 @@ import qualified Csg
 import qualified Csg.STL
 import qualified Data.Text.IO as T
 
-screenWidth = 131.5
+screenWidth = 126
 
-screenHeight = 102.0
+screenHeight = 101.0
 
 screenT = 4.0
 
@@ -53,7 +53,7 @@ usbHeight = 25
 usbR = 2 
 
 usbCavity :: Csg.BspTree
-usbCavity = Csg.scale (1, 1000, 1) $ beveledSquare usbR usbWidth usbDepth
+usbCavity = Csg.scale (1, 1000, 1) $ Csg.translate (0, -0.5, 0) $ beveledSquare usbR usbWidth usbDepth
 
 switchTracks :: Csg.BspTree
 switchTracks = 
@@ -65,6 +65,40 @@ switchTracks =
       trackD = 65/3
    in Csg.unionConcat [Csg.translate (0, (screenHeight/2)-(16 + (i*trackD)), 0) oneTrack | i <- [0..3]]
 
+stripHeight = 15
+stripThickness = 2
+stripDown = 16
+stripMiddle = 32.5
+
+topStrip :: Csg.BspTree
+topStrip = Csg.translate (0, screenHeight/2 - stripMiddle ,-stripDown)$ Csg.scale (103+borderLeft, stripHeight, stripThickness) $ Csg.translate (0.5, -0.5, -0.5) Csg.unitCube
+
+bottomStrip :: Csg.BspTree
+bottomStrip = Csg.translate (0, screenHeight/2 - stripMiddle,-stripDown)$ Csg.scale (90+borderWidthOuter, stripHeight, stripThickness) $ Csg.translate (-0.5, 0.5, -0.5) Csg.unitCube
+
+
+cameraHolderThickness = 8
+cameraThickness = 1.5
+cameraWidth = 25
+cameraHolderOuterW = cameraWidth + 10
+
+piHoles :: Csg.BspTree
+piHoles =
+  Csg.translate (screenWidth/2 -27,screenHeight/2 - 21, 0) $  
+   Csg.unionConcat [ Csg.translate ((65-7)*i,(30-7)*j,0) $ Csg.scale (1.5,1.5,100)$ Csg.unitCylinder 8 | i <- [0, -1], j <- [0,-1]]  
+
+cameraHolder :: Bool -> Csg.BspTree
+cameraHolder b = let x = if b then 0.5 else -0.5
+                     positive = Csg.translate (0, screenHeight/2 - stripMiddle,-stripDown) $
+                                       Csg.scale (cameraHolderOuterW, stripHeight, cameraHolderThickness) $
+                                         Csg.translate (0, x, -0.5) Csg.unitCube
+                     negative1 = Csg.scale (cameraWidth - 1, 100,100) $ Csg.unitCube
+                     negative2 = Csg.translate (0, 0,-stripDown-stripThickness-cameraHolderThickness/2) $
+                                       Csg.scale (cameraWidth, 100, cameraThickness) $ Csg.unitCube
+                  in Csg.translate (10, 0, 0) (positive `Csg.subtract` (negative1 `Csg.union` negative2))
+
+bottomStripSupport  :: Csg.BspTree
+bottomStripSupport  = Csg.translate (0, screenHeight/2 - stripMiddle,0)$ Csg.scale (20, stripHeight, stripThickness+stripDown) $ Csg.translate (-0.5, 0.5, -0.5) Csg.unitCube
 objectLeft :: Csg.BspTree
 objectLeft = 
   let 
@@ -79,9 +113,10 @@ objectLeft =
       usbBlock = Csg.translate (left+batteryPadding+batteryWidth, -heightOuter/2,0) $ Csg.scale usbBlockScale $ Csg.translate (0.5, 0.5, -0.5) Csg.unitCube
       usbCavityPositioned = Csg.translate (left + batteryPadding*2 + batteryWidth + usbWidth/2, 0, -batteryPadding - usbDepth/2) $ usbCavity
       switchTrackPositioned = Csg.translate (left + 2, 0, 0) switchTracks
-   in (frameFragment `Csg.union` batteryBlock `Csg.union` usbBlock)
+      topStripPositioned = Csg.translate (left, 0, 0) $ topStrip
+   in (frameFragment `Csg.union` batteryBlock `Csg.union` usbBlock `Csg.union` topStripPositioned `Csg.union` cameraHolder False)
          `Csg.subtract`
-        (batteryCavityPositioned `Csg.union` switchTrackPositioned `Csg.union` usbCavityPositioned)
+        (batteryCavityPositioned `Csg.union` switchTrackPositioned `Csg.union` usbCavityPositioned `Csg.union` piHoles)
 
 
 objectRight :: Csg.BspTree
@@ -91,7 +126,9 @@ objectRight =
       frameScale = (rightDepth + borderWidthOuter, heightOuter, screenT + 2*borderWidthOuter)
       frameBulk = Csg.translate (right, 0, -borderWidthOuter ) $ Csg.scale frameScale $ Csg.translate (-0.5,0,0.5) Csg.unitCube 
       frameFragment = frameBulk `Csg.subtract` (screen `Csg.union` screenInner)
-   in (frameFragment)
+      bottomStripPositioned = Csg.translate (right, 0, 0) bottomStrip
+      bottomStripSupportPositioned = Csg.translate (right, 0, 0) bottomStripSupport
+   in (frameFragment `Csg.union` bottomStripPositioned `Csg.union` bottomStripSupportPositioned `Csg.union` cameraHolder True) `Csg.subtract` piHoles
 
 pathLeft = "impression-case-left.stl"
 
