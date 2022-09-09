@@ -25,8 +25,8 @@ screen = Csg.scale (screenWidth, screenHeight, screenT) $Csg.translate (0, 0, 0.
 screenInner :: Csg.BspTree
 screenInner = Csg.scale (screenWidth-borderWidthInner*2, screenHeight-borderWidthInner*2, 100) $Csg.translate (0, 0, 0.0) $ Csg.unitCube
 
-batteryDepth = 55
-batteryWidth = 23
+batteryDepth = 44
+batteryWidth = 22.5
 
 batteryPadding = 5
 batteryBevelR = 7
@@ -40,7 +40,8 @@ beveledSquare r w d =
 batteryCavity :: Csg.BspTree 
 batteryCavity = let mainCav = Csg.scale (1, 1000, 1) $ beveledSquare batteryBevelR batteryWidth batteryDepth
                     crackWidth = 3
-                    crack = Csg.scale (crackWidth, 1000, 1000) $ Csg.translate (0, 0, -0.5) Csg.unitCube 
+                    crack = (Csg.scale (crackWidth, 1000, 1000) $ Csg.translate (0, 0, -0.5) Csg.unitCube) `Csg.subtract`
+                            (Csg.unionConcat [ Csg.translate (0,screenWidth/8*i, 0) $ Csg.scale (1000, crackWidth, 1000) $ Csg.unitCube | i <- [-1, 1]])
                     buttonScale = (10, 16, 1000)
                     buttonHole = Csg.translate (0, (-heightOuter/2) + 15, 0)$  Csg.scale buttonScale $ Csg.translate (0, 0, -0.5) Csg.unitCube
                     lightScale = (1000, 25, 10)
@@ -49,8 +50,8 @@ batteryCavity = let mainCav = Csg.scale (1, 1000, 1) $ beveledSquare batteryBeve
 
 usbDepth = 18.5
 usbWidth = 10
-usbHeight = 25
-usbR = 2 
+usbHeight = 24.5
+usbR = 2.5 
 
 usbCavity :: Csg.BspTree
 usbCavity = Csg.scale (1, 1000, 1) $ Csg.translate (0, -0.5, 0) $ beveledSquare usbR usbWidth usbDepth
@@ -67,11 +68,14 @@ switchTracks =
 
 stripHeight = 15
 stripThickness = 2
-stripDown = 16
+stripDown = 11
 stripMiddle = 32.5
 
 topStrip :: Csg.BspTree
-topStrip = Csg.translate (0, screenHeight/2 - stripMiddle ,-stripDown)$ Csg.scale (103+borderLeft, stripHeight, stripThickness) $ Csg.translate (0.5, -0.5, -0.5) Csg.unitCube
+topStrip = Csg.translate (0, screenHeight/2 - stripMiddle ,-stripDown)$ 
+               (Csg.scale (103+borderLeft, stripHeight, stripThickness) $ Csg.translate (0.5, -0.5, -0.5) Csg.unitCube) `Csg.union`
+               (Csg.scale (44+borderLeft,4, 40) $ Csg.translate (0.5, -0.5, -0.5) Csg.unitCube)
+
 
 bottomStrip :: Csg.BspTree
 bottomStrip = Csg.translate (0, screenHeight/2 - stripMiddle,-stripDown)$ Csg.scale (90+borderWidthOuter, stripHeight, stripThickness) $ Csg.translate (-0.5, 0.5, -0.5) Csg.unitCube
