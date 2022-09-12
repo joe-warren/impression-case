@@ -29,7 +29,7 @@ batteryDepth = 44
 batteryWidth = 22.5
 
 batteryPadding = 5
-batteryBevelR = 7
+batteryBevelR = 8
 
 beveledSquare :: Double -> Double -> Double -> Csg.BspTree
 beveledSquare r w d = 
@@ -73,8 +73,8 @@ switch = let t = 0.5
                Csg.scale (2,4-t,2-t) $ Csg.translate (-0.5, 0, -0.5) Csg.unitCube
              ]
 stripHeight = 15
-stripThickness = 2
-stripDown = 12
+stripThickness = 4
+stripDown = 13
 stripMiddle = 32.5
 
 topStripThickness = 6
@@ -95,7 +95,7 @@ bottomStrip = Csg.translate (0, screenHeight/2 - stripMiddle,-stripDown)$ Csg.sc
 bottomStripSupport :: Csg.BspTree
 bottomStripSupport = Csg.unionConcat [ 
    --left
-   Csg.translate (0, screenHeight/2 - stripMiddle,0)$ Csg.scale (20, stripHeight, stripThickness+stripDown) $ Csg.translate (-0.5, 0.5, -0.5) Csg.unitCube,
+   Csg.translate (0, screenHeight/2 - stripMiddle,0)$ Csg.scale (18, stripHeight, stripThickness+stripDown) $ Csg.translate (-0.5, 0.5, -0.5) Csg.unitCube,
    --top
    Csg.translate (-rightDepth, heightOuter/2 ,0)$ Csg.scale (90-rightDepth, stripHeight-stripThickness, stripThickness+stripDown) $ Csg.translate (0.5, -0.5, -0.5) Csg.unitCube,
    Csg.translate (-90, heightOuter/2 ,-borderWidthOuter)$ Csg.scale (20, stripHeight-stripThickness, stripThickness+stripDown-borderWidthOuter) $ Csg.translate (0.5, -0.5, -0.5) Csg.unitCube,
@@ -105,11 +105,6 @@ bottomStripSupport = Csg.unionConcat [
    Csg.translate (-65, -heightOuter/2 ,0)$ Csg.scale (20, stripHeight-stripThickness, stripThickness+stripDown) $ Csg.translate (0.5, 0.5, -0.5) Csg.unitCube,
    Csg.translate (-65, -screenHeight/2 ,-stripDown)$ Csg.scale (20, screenHeight - stripMiddle, stripThickness) $ Csg.translate (0.5, 0.5, -0.5) Csg.unitCube
    ]
-
-cameraHolderThickness = 8
-cameraThickness = 1.5
-cameraWidth = 25
-cameraHolderOuterW = cameraWidth + 10
 
 piHoles :: Csg.BspTree
 piHoles =
@@ -122,13 +117,18 @@ piNutHoles =
   Csg.translate (screenWidth/2 -27,screenHeight/2 - 21, 0.01) $  
    Csg.unionConcat [ Csg.translate ((65-7)*i,(30-7)*j,0) $ Csg.scale (3.5,3.5,6)$ Csg.unitCylinder 6 | i <- [0, -1], j <- [-1]]  
 
+cameraHolderThickness = 10
+cameraThickness = 1.5
+cameraWidth = 25
+cameraHolderOuterW = cameraWidth + 10
+
 cameraHolder :: Bool -> Csg.BspTree
 cameraHolder b = let x = if b then 0.5 else -0.5
                      positive = Csg.translate (0, screenHeight/2 - stripMiddle,-stripDown) $
                                        Csg.scale (cameraHolderOuterW, stripHeight, cameraHolderThickness) $
                                          Csg.translate (0, x, -0.5) Csg.unitCube
-                     negative1 = Csg.scale (cameraWidth - 1, 100,100) $ Csg.unitCube
-                     negative2 = Csg.translate (0, 0,-stripDown-stripThickness-cameraHolderThickness/2) $
+                     negative1 = Csg.scale (cameraWidth - 2, 100,100) $ Csg.unitCube
+                     negative2 = Csg.translate (0, 0,-stripDown-stripThickness-(cameraHolderThickness-stripThickness)*0.7) $
                                        Csg.scale (cameraWidth, 100, cameraThickness) $ Csg.unitCube
                   in Csg.translate (10, 0, 0) (positive `Csg.subtract` (negative1 `Csg.union` negative2))
 
