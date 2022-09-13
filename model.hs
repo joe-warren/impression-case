@@ -81,7 +81,7 @@ topStripThickness = 6
 
 topStrip :: Csg.BspTree
 topStrip = (Csg.translate (0, screenHeight/2 - stripMiddle + 2 ,0) $ 
-               ( (Csg.scale (107+borderLeft, stripHeight+7, topStripThickness) $ Csg.translate (0.5, -0.5, -0.5) Csg.unitCube) `Csg.subtract` 
+               ( (Csg.scale (107+borderLeft, stripHeight+4, topStripThickness) $ Csg.translate (0.5, -0.5, -0.5) Csg.unitCube) `Csg.subtract` 
                  (Csg.translate (108+borderLeft-35, 0, 0) $ Csg.scale (40, 20, 5) $ Csg.translate (0, 0,  0) Csg.unitCube)
                ) `Csg.union`
                (Csg.translate (0, -5, 0) $ Csg.scale (34+borderLeft,4, 40) $ Csg.translate (0.5, -0.5, -0.5) Csg.unitCube)
